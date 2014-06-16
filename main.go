@@ -60,7 +60,7 @@ func showHelp() {
    docker-build-service - Provides a build service for code using docker containers
 
 USAGE:
-   docker-build-service [global options] command
+   docker-build-service [options] command
 
 VERSION:
    %s
@@ -75,7 +75,7 @@ COMMANDS:
   version
     Show version
 
-GLOBAL OPTIONS:
+OPTIONS:
 	--port, -p
     Set port number to use. 
     Port can also be set via PORT environment variable.
@@ -94,7 +94,8 @@ func serve() {
 		handlers.Compile(w, r)
 	})
 
-	log.Printf("Listen on %v. Go to http://%v/", portFlag, hostFlag+":"+portFlag)
+	log.Printf("Listening on %v. Press Ctrl-C to exit", portFlag)
+	log.Printf("Go to http://%v/", hostFlag+":"+portFlag)
 	log.Fatal(http.ListenAndServe(hostFlag+":"+portFlag, nil))
 }
 

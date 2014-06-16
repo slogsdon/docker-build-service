@@ -7,6 +7,7 @@ import (
 	"github.com/slogsdon/docker-build-service/build"
 	"math/rand"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -22,10 +23,16 @@ func Compile(w http.ResponseWriter, r *http.Request) {
 
 	build.Create(app, lang, code)
 
-	buildresp, _ := build.Build(app)
-	runresp, _ := build.Run(app)
+	buildresp, err := build.Build(app)
+	if err != nil {
+		fmt.Println(err)
+	}
+	runresp, err := build.Run(app)
+	if err != nil {
+		fmt.Println(err)
+	}
 
-	fullresp := build.FullResp{AppId: app, Build: buildresp, Run: runresp}
+	fullresp := build.GetFullResp(app, buildresp, runresp)
 
 	json, err := json.Marshal(fullresp)
 	if err == nil {
@@ -55,7 +62,8 @@ func getId() string {
 	for i := 0; i < 16; i++ {
 		bytes[i] = byte(randInt(65, 90))
 	}
-	return base64.StdEncoding.EncodeToString(bytes)
+	b64 := base64.StdEncoding.EncodeToString(bytes)
+	return strings.ToLower(strings.Replace(b64, "=", "", -1))
 }
 
 func randInt(min int, max int) int {

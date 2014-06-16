@@ -32,15 +32,23 @@ func Create(app, lang string, code []byte) {
 	return
 }
 
-func Build(app string) (Response, error) {
+func Build(app string) (response, error) {
 	return callCmd(exec.Command("docker", "build", "-t", app+"/app", "./builds/"+app))
 }
 
-func Run(app string) (Response, error) {
+func Run(app string) (response, error) {
 	return callCmd(exec.Command("docker", "run", "-t", app+"/app"))
 }
 
-func callCmd(cmd *exec.Cmd) (Response, error) {
+func GetFullResp(app string, buildresp, runresp response) fullResp {
+	return fullResp{
+		AppId: app,
+		Build: buildresp,
+		Run:   runresp,
+	}
+}
+
+func callCmd(cmd *exec.Cmd) (response, error) {
 	var (
 		stdout, stderr bytes.Buffer
 		err            error
@@ -64,7 +72,7 @@ func callCmd(cmd *exec.Cmd) (Response, error) {
 		err = err
 	}
 
-	return Response{Success: err == nil, Result: stdout.String()}, err
+	return response{Success: err == nil, Result: stdout.String()}, err
 }
 
 type errorTimeout struct {
@@ -75,13 +83,13 @@ func (e errorTimeout) Error() string {
 	return e.s
 }
 
-type Response struct {
+type response struct {
 	Success bool   `json:"success,omitempty"`
 	Result  string `json:"result,omitempty"`
 }
 
-type FullResp struct {
+type fullResp struct {
 	AppId string   `json:"app_id,omitempty"`
-	Build Response `json:"success,omitempty"`
-	Run   Response `json:"result,omitempty"`
+	Build response `json:"success,omitempty"`
+	Run   response `json:"result,omitempty"`
 }
